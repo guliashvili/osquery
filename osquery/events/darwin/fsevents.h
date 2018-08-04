@@ -79,8 +79,6 @@ using FSEventsEventContextRef = std::shared_ptr<FSEventsEventContext>;
 using FSEventsSubscriptionContextRef =
     std::shared_ptr<FSEventsSubscriptionContext>;
 
-using ExcludePathSet = PathSet<patternedPath>;
-
 /**
  * @brief An osquery EventPublisher for the Apple FSEvents notification API.
  *
@@ -165,7 +163,7 @@ class FSEventsEventPublisher
   std::set<std::string> paths_;
 
   /// Events pertaining to these paths not to be propagated.
-  ExcludePathSet exclude_paths_;
+  PathSet exclude_paths_;
 
   /// Reference to the run loop for this thread.
   CFRunLoopRef run_loop_{nullptr};
