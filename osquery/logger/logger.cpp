@@ -42,9 +42,6 @@ FLAG(bool, verbose, false, "Enable verbose informational messages");
 FLAG_ALIAS(bool, verbose_debug, verbose);
 FLAG_ALIAS(bool, debug, verbose);
 
-/// Despite being a configurable option, this is only read/used at load.
-FLAG(bool, disable_logging, false, "Disable ERROR/INFO logging");
-
 FLAG(string, logger_plugin, "filesystem", "Logger plugin name");
 
 /// Log each added or removed line individually, as an "event".
@@ -345,11 +342,6 @@ void initStatusLogger(const std::string& name, bool init_glog) {
 }
 
 void initLogger(const std::string& name) {
-  // Check if logging is disabled, if so then no need to shuttle intermediates.
-  if (FLAGS_disable_logging) {
-    return;
-  }
-
   // Stop the buffering sink and store the intermediate logs.
   BufferedLogSink::get().disable();
   BufferedLogSink::get().resetPlugins();
@@ -432,10 +424,6 @@ void BufferedLogSink::send(google::LogSeverity severity,
                            const struct ::tm* tm_time,
                            const char* message,
                            size_t message_len) {
-  if (FLAGS_disable_logging) {
-    return;
-  }
-
   // WARNING, be extremely careful when accessing data here.
   // This should not cause any persistent storage or logging actions.
   {
@@ -543,10 +531,6 @@ Status logString(const std::string& message, const std::string& category) {
 Status logString(const std::string& message,
                  const std::string& category,
                  const std::string& receiver) {
-  if (FLAGS_disable_logging) {
-    return Status(0, "Logging disabled");
-  }
-
   Status status;
   for (const auto& logger : osquery::split(receiver, ",")) {
     if (FLAGS_logger_secondary_status_only &&
@@ -572,10 +556,6 @@ Status logQueryLogItem(const QueryLogItem& results) {
 
 Status logQueryLogItem(const QueryLogItem& results,
                        const std::string& receiver) {
-  if (FLAGS_disable_logging) {
-    return Status(0, "Logging disabled");
-  }
-
   std::vector<std::string> json_items;
   Status status;
   if (FLAGS_logger_event_type) {
@@ -596,10 +576,6 @@ Status logQueryLogItem(const QueryLogItem& results,
 }
 
 Status logSnapshotQuery(const QueryLogItem& item) {
-  if (FLAGS_disable_logging) {
-    return Status(0, "Logging disabled");
-  }
-
   std::vector<std::string> json_items;
   Status status;
   if (FLAGS_logger_snapshot_event_type) {
@@ -645,7 +621,7 @@ size_t queuedSenders() {
 }
 
 void relayStatusLogs(bool async) {
-  if (FLAGS_disable_logging || !DatabasePlugin::kDBInitialized) {
+  if (!DatabasePlugin::kDBInitialized) {
     // The logger plugins may not be setUp if logging is disabled.
     // If the database is not setUp, or is in a reset, status logs continue
     // to buffer.

@@ -334,10 +334,6 @@ Multiple logger plugins may be used simultaneously, effectively copying logs to 
 
 Built-in options include: **filesystem**, **tls**, **syslog**, and several Amazon/AWS options.
 
-`--disable_logging=false`
-
-Disable ERROR/WARNING/INFO (called status logs) and query result [logging](../deployment/logging.md).
-
 `--logger_event_type=true`
 
 Log scheduled results as events.
