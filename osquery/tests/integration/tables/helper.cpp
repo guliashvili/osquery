@@ -58,6 +58,35 @@ bool IntegrationTableTest::is_valid_hex(const std::string& value) {
   return true;
 }
 
+void IntegrationTableTest::validate_row_assert(
+    const Row& row, const ValidatatioMap& validation_map) {
+  ASSERT_EQ(row.size(), validation_map.size());
+
+  for (auto iter : validation_map) {
+    std::string key = iter.first;
+    auto row_data_iter = row.find(key);
+    ASSERT_NE(row_data_iter, row.end());
+
+    std::string value = row_data_iter->second;
+
+    ValidatatioDataType validator = iter.second;
+    if (validator.type() == typeid(int)) {
+      int flags = boost::get<int>(validator);
+      ASSERT_TRUE(validate_value_using_flags(value, flags));
+    } else {
+      ASSERT_TRUE(
+          boost::get<std::shared_ptr<DataCheck>>(validator)->validate(value));
+    }
+  }
+}
+
+void IntegrationTableTest::validate_rows_assert(
+    const std::vector<Row>& rows, const ValidatatioMap& validation_map) {
+  for (auto row : rows) {
+    validate_row_assert(row, validation_map);
+  }
+}
+
 bool IntegrationTableTest::validate_value_using_flags(const std::string& value,
                                                       int flags) {
   if ((flags & NonEmpty) > 0) {
