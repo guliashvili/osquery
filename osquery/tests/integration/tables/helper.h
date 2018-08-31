@@ -17,6 +17,17 @@
 
 namespace osquery {
 
+    using CustomCheckerType = std::function<bool(const std::string&)>;
+
+class EmptyOr final{
+public:
+ explicit EmptyOr(CustomCheckerType custom_checker) : custom_checker_(custom_checker){};
+ bool operator()(const std::string& string) const;
+
+private:
+ const CustomCheckerType custom_checker_;
+};
+
 class IntMinMaxCheck final {
  public:
   explicit IntMinMaxCheck(int64_t min, int64_t max) : min_(min), max_(max){};
@@ -73,7 +84,6 @@ class IntegrationTableTest : public ::testing::Test {
     NonEmptyString = NonEmpty | NormalType | NonNull,
   };
 
-  using CustomCheckerType = std::function<bool(const std::string&)>;
   using ValidatatioDataType = boost::variant<int, CustomCheckerType>;
   using ValidatatioMap = std::unordered_map<std::string, ValidatatioDataType>;
 

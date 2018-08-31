@@ -81,6 +81,10 @@ bool SpecificValuesCheck::operator()(const std::string& string) const {
   return set_.find(string) != set_.end();
 }
 
+bool EmptyOr::operator()(const std::string& string) const {
+  return string.size() == 0 || custom_checker_(string);
+}
+
 QueryData IntegrationTableTest::execute_query(std::string query) {
   SQLInternal sql(query, false);
   return sql.rows();
